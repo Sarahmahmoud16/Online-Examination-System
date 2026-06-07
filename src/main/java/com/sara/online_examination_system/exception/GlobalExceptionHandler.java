@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @RestControllerAdvice //tell spring any exception occurs come here and i will solve
 //this class handle all errors
@@ -32,8 +31,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ApiError> handleUserNotFound(UserNotFoundException ex)
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiError> handleUserNotFound(NotFoundException ex)
     {
         ApiError error=new ApiError(ex.getMessage(),HttpStatus.NOT_FOUND.value(), LocalDateTime.now());
         return new ResponseEntity<>(error,HttpStatus.NOT_FOUND);

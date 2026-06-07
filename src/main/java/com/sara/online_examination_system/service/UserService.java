@@ -5,8 +5,9 @@ import com.sara.online_examination_system.dto.RegisterRequest;
 import com.sara.online_examination_system.dto.UserResponse;
 import com.sara.online_examination_system.dto.UsersRegisterRequest;
 import com.sara.online_examination_system.exception.EmailAlreadyExistException;
-import com.sara.online_examination_system.exception.UserNotFoundException;
+import com.sara.online_examination_system.exception.NotFoundException;
 import com.sara.online_examination_system.model.*;
+import com.sara.online_examination_system.repository.InstructorRepo;
 import com.sara.online_examination_system.repository.StudentRepo;
 import com.sara.online_examination_system.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -25,6 +25,8 @@ public class UserService {
     private StudentRepo studentRepo;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private InstructorRepo instructorRepo;
     private UserResponse mapToResponse(User user) {
 
         UserResponse res = new UserResponse();
@@ -67,7 +69,9 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
         user.setStatus(Status.ACTIVE);
-        userRepo.save(user);
+        Instructor instructor=new Instructor();
+        instructor.setUser(user);
+        instructorRepo.save(instructor);
         return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),user.getStatus());
     }
 
@@ -77,13 +81,13 @@ public class UserService {
     }
 
     public UserResponse getUserById(Long userId) {
-        User user=userRepo.findById(userId).orElseThrow(()->new UserNotFoundException("User Not Found with id "+userId));
+        User user=userRepo.findById(userId).orElseThrow(()->new NotFoundException("User Not Found with id "+userId));
         return mapToResponse(user);
     }
 
     public UserResponse deactivateUser(Long userId)
     {
-        User user=userRepo.findById(userId).orElseThrow(()->new UserNotFoundException("User Not Found with id "+userId));
+        User user=userRepo.findById(userId).orElseThrow(()->new NotFoundException("User Not Found with id "+userId));
         if(user!=null&&user.getStatus()==Status.ACTIVE){
             user.setStatus(Status.INACTIVE);
         }
@@ -93,7 +97,7 @@ public class UserService {
 
     public UserResponse UpdateProfile(ProfileRequet profileRequet,Long userId)
     {
-        User user=userRepo.findById(userId).orElseThrow(()->new UserNotFoundException("User Not Found With Id : "+userId));
+        User user=userRepo.findById(userId).orElseThrow(()->new NotFoundException("User Not Found With Id : "+userId));
         user.setName(profileRequet.getName());
 
             user.setEmail(profileRequet.getEmail());
